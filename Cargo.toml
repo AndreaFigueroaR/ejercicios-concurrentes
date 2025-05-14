@@ -1,0 +1,30 @@
+[package]
+name = "modelos-concurrencia"
+version = "0.1.0"
+# edition = "2021"
+
+[[bin]]
+name = "banquero-bussy-waiting"
+path = "src/estado-compartido/banquero_bussy_waiting/main.rs"
+
+[[bin]]
+name = "banquero-sin-sincro"
+path = "src/estado-compartido/banquero_sin_sincro/main.rs"
+
+[[bin]]
+name = "banquero-barriers"
+path = "src/estado-compartido/banquero_barriers/main.rs"
+
+[[bin]]
+name = "barbero-semaforos"
+path = "src/estado-compartido/barbero_semaforos/main.rs"
+
+
+[[bin]]
+name = "prog-asincronica"
+path = "src/prog-asincronica/main.rs"
+
+[dependencies]
+
+std-semaphore = "0.1"
+rand = "0.8"
