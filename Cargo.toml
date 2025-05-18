@@ -24,6 +24,14 @@ path = "src/estado-compartido/barbero_semaforos/main.rs"
 name = "prog-asincronica"
 path = "src/prog-asincronica/main.rs"
 
+[[bin]]
+name = "banquero-canales"
+path = "src/actores-canales/banquero-canales/main.rs"
+
+[[bin]]
+name = "banquero-actores"
+path = "src/actores-canales/banquero-actores/main.rs"
+
 [dependencies]
 
 std-semaphore = "0.1"
