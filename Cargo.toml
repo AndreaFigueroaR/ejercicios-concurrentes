@@ -44,3 +44,4 @@ actix-rt = "2.0" # <-- Runtime for actix
 futures-channel = "*"
 tokio = "*"
 actix_async_handler = "0.1.0"
+futures = "0.3"
