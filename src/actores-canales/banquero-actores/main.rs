@@ -90,7 +90,6 @@ impl Handler<CapitalInversion> for Inversor {
     type Result = ();
 
     fn handle(&mut self, msg: CapitalInversion , _ctx: &mut Context<Self>) -> Self::Result {
-        //aqui lo que hariamos es hacer que el inversionista lo invierta
         println!("[Inversor {}] me dan {}", self.id, msg.capital_disponible);
         tokio::time::sleep(Duration::from_secs(2)).await;
         let resultado = msg.capital_disponible * thread_rng().gen_range(0.5..1.5);
@@ -99,14 +98,12 @@ impl Handler<CapitalInversion> for Inversor {
     }
 }
 
-// finalmente tenemos el mensaje que cada inversor le manda a la cuenta para depositar sus resultados
 #[derive(Message)]
 #[rtype(result = "()")]
 struct ResultadoInversion{
     inversor_id : u16,
     resultado: f64
 }
-//como no se va atardar mucho el procesarlo lo hago no asincronico
 impl Handler<ResultadoInversion> for GestionSemanal{
     type Result = ();
     fn handle(&mut self, msg: ResultadoInversion , _ctx: &mut Context<Self>){
@@ -126,29 +123,39 @@ impl Handler<ResultadoInversion> for GestionSemanal{
         }
     }
 }
+//para solucionar el hecho de que el programa estaba concluyendo prematuramente sin dejar tiempo de ejecución a que el resto
+// de mensajes se procesen lo que vamos a ahcer es dejar corriendo por siempre a propósito el runtime de actix. Esto lo logramos
+// creando un sistema, diciendole que esjecute primero los envios de mensajes que queriamos para iniciar el resto de mensajes,
+// luego forzar a que se mantenga corriendo el programa hasta que se haga el llamado explicito en el programa a: System::current().stop()
+// el cual no vamos a hacer, por lo tanto podremos ver al programa ejecutarse indefiniidamente.
+fn main(){
+    //creación explícita del sistema
+    let sys = System::new();
 
-#[actix_rt::main]
-async fn main(){
     const INVERSORES: u16 = 10;
+    sys.block_on(async {
+        //creamos el banquero con capital inicial 1000.0, inicialmente no tiene seteados los inversores, espero poder enviarle un mensaje que setee los inversores
+        let addr_banquero = Banquero{plata: 1000.0, inversores: vec![]}.start();
 
-    //creamos el banquero con capital inicial 1000.0, inicialmente no tiene seteados los inversores, espero poder enviarle un mensaje que setee los inversores
-    let addr_banquero = Banquero{plata: 1000.0, inversores: vec![]}.start();
-
-    //creamos el GestionSemanal 
-    let cuenta_semanal = GestionSemanal{
-        inversiones_completadas: HashSet::new(), 
-        resultados_acumulados:0.0,
-        resultados_a_esperar: INVERSORES,
-        dueño: addr_banquero.clone()
-    }.start();
+        //creamos el GestionSemanal 
+        let cuenta_semanal = GestionSemanal{
+            inversiones_completadas: HashSet::new(), 
+            resultados_acumulados:0.0,
+            resultados_a_esperar: INVERSORES,
+            dueño: addr_banquero.clone()
+        }.start();
+        
+        let inversores: Vec<Addr<Inversor>> = (0..INVERSORES).map(|id|{
+            //por cada inversionista creo el actor y le doy acceso a la direción destino de las inversiones
+            Inversor{id,
+                cuenta_destino: cuenta_semanal.clone()
+            }.start()
+        }).collect();
+        addr_banquero.send(SetInversores{inversores}).await.unwrap();
+        addr_banquero.send(ResultadoSemanal{resultado_semanal:100.0}).await.unwrap();
+    });
+    // ¡Ahora sí! Esto mantiene el System corriendo indefinidamente
+    sys.run().unwrap();
     
-    let inversores: Vec<Addr<Inversor>> = (0..INVERSORES).map(|id|{
-        //por cada inversionista creo el actor y le doy acceso a la direción destino de las inversiones
-        Inversor{id,
-            cuenta_destino: cuenta_semanal.clone()
-        }.start()
-    }).collect();
-    addr_banquero.send(SetInversores{inversores}).await.unwrap();
-    addr_banquero.send(ResultadoSemanal{resultado_semanal:100.0}).await.unwrap();
     
 }
