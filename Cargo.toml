@@ -22,7 +22,7 @@ path = "src/estado-compartido/barbero_semaforos/main.rs"
 
 [[bin]]
 name = "prog-asincronica"
-path = "src/prog-asincronica/main.rs"
+path = "src/prog-asincronica/acceptor-server/main.rs"
 
 [[bin]]
 name = "banquero-canales"
@@ -46,9 +46,10 @@ rand = "0.8"
 actix = "0.13.5"
 actix-rt = "2.0" # <-- Runtime for actix
 futures-channel = "*"
-tokio = "*"
 actix_async_handler = "0.1.0"
 futures = "0.3"
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0" # necesario para usar el main de tokio
 
 [dev-dependencies]
 actix_async_handler = "0.1.0"
