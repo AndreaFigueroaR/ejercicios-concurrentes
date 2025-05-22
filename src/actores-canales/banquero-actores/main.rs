@@ -84,12 +84,12 @@ impl  Handler<ResultadoSemanal> for Banquero{
 struct CapitalInversion{
     capital_disponible: f64
 }
-//como este mensaje sí tardará en procesarse lo hago asincrónico: porque maneja futuros
+//HANDLE ASINCRÓNICO: como este mensaje sí tardará en procesarse POR I/o manejamos futuros
 #[async_handler]
 impl Handler<CapitalInversion> for Inversor {
     type Result = ();
 
-    fn handle(&mut self, msg: CapitalInversion , _ctx: &mut Context<Self>) -> Self::Result {
+    async fn handle(&mut self, msg: CapitalInversion , _ctx: &mut Context<Self>) -> Self::Result {
         println!("[Inversor {}] me dan {}", self.id, msg.capital_disponible);
         tokio::time::sleep(Duration::from_secs(2)).await;
         let resultado = msg.capital_disponible * thread_rng().gen_range(0.5..1.5);

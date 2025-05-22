@@ -36,6 +36,10 @@ path = "src/actores-canales/banquero-actores/main.rs"
 name = "hola-andrea"
 path = "src/practica-actix/hola-andrea/main.rs"
 
+[[bin]]
+name = "filosofos-actores"
+path = "src/actores-canales/filosofos-actores/main.rs"
+
 [dependencies]
 std-semaphore = "0.1"
 rand = "0.8"
@@ -45,3 +49,6 @@ futures-channel = "*"
 tokio = "*"
 actix_async_handler = "0.1.0"
 futures = "0.3"
+
+[dev-dependencies]
+actix_async_handler = "0.1.0"
