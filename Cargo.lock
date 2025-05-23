@@ -308,11 +308,13 @@ dependencies = [
  "actix-rt",
  "actix_async_handler",
  "anyhow",
+ "bytes",
  "futures",
  "futures-channel",
  "rand",
  "std-semaphore",
  "tokio",
+ "tokio-util",
 ]
 
 [[package]]

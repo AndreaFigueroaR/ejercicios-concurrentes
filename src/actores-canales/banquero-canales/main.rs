@@ -65,6 +65,6 @@ fn inversor(id: i32, prestamo: Receiver<f64>, devolucion: Sender<(i32, f64)>) {
         thread::sleep(Duration::from_secs(2));
         let resultado = plata_inicial * thread_rng().gen_range(0.5..1.5);
         println!("[Inversor {}] devuelvo {}", id, resultado);
-        devolucion.send((id, resultado));
+        let _ = devolucion.send((id, resultado));
     }
 }
