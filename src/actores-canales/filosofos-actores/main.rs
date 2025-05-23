@@ -7,9 +7,6 @@ use std::time::Duration;
 
 use actix::{Actor, Addr, AsyncContext, Context, Handler, Message, System };
 use actix_async_handler::async_handler;
-// use actix::clock::sleep;
-// use actix::dev::fut::future::Map;
-// use actix::fut::result;
 use std::collections::VecDeque;
 
 
@@ -17,20 +14,15 @@ use std::collections::VecDeque;
 /*              DEFINO ACTORES           */
 /*****************************************/
 
-/*****************FILOSOFO****************/
+/*****************PHILOSOPHER****************/
 struct Philosopher{
-    //direcciones a donde pedir 
+    //direcciones a donde pedir (no se modifica)
     chopsticks: HashMap<u32,Addr<Chopstick>>,
     chopsticks_in_hand: HashSet<u32>,
     my_id: u32
 }
 impl Actor for Philosopher{
     type Context = Context<Self>;
-    // tambén tengo inicializar el numero de choksticks que tiene en la mano y los accesos
-    // fn started(&mut self, ctx: &mut Self::Context) {
-    //     self.chopsticks_in_hand = 0;
-    // }
-    // esta inicialización la puedo hacer simplemente al crear las instancias de los actores
 }
 
 /***************CHOPSTICKS**************/
@@ -50,28 +42,22 @@ struct Chopstick{
 }
 impl Actor for Chopstick{
     type Context = Context<Self>;
-    // //me gustaría establecer el estado inicial de los palitos como disponibles
-    // fn started(&mut self, ctx: &mut Self::Context) {
-    //     self.state = ChopstickState::AVAILABLE;
-    // }
-    //otra vez, la inicialización la puedo hacer al crear el actor (struct)
 }
 
 /*****************************************/
 /*         MESSAGES: chopstick           */
 /*****************************************/
 
-//**************CHOPSTICK REQUEST**************/
+//***********CHOPSTICK REQUEST************/
 #[derive(Message)]
 #[rtype(result = "()")]
 struct ChopstickRequest{
     requester: Addr<Philosopher>
 }
-//handler como no debe "esperar a que pase algo" no es asincronico.
 impl Handler<ChopstickRequest> for Chopstick{
     type Result = ();
     fn handle(&mut self, msg: ChopstickRequest, _ctx: &mut Self::Context) -> Self::Result {
-        //dependiendo del estado del chopstic se procede:
+        // dependiendo del estado del chopstic se procede:
         match self.state {
             ChopstickState::AVAILABLE => {
                 //si el palito está disponible -> se lo doy al filosofo
@@ -101,7 +87,7 @@ impl Handler<ChopstickRelease> for Chopstick{
     fn handle(&mut self, _msg: ChopstickRelease, _ctx: &mut Self::Context) -> Self::Result {
         match self.state {
             ChopstickState::AVAILABLE => {
-                //shouldnt happen 
+                //shouldnt happen !
                 panic!("Chopstick released twice!");
             },
             ChopstickState::TAKEN => {
@@ -132,6 +118,7 @@ impl Handler<ChopstickRelease> for Chopstick{
 /*         MESSAGES: Philosopher         */
 /*****************************************/
 
+/*HUNGRY: lets try to eat something (recursive) */
 #[derive(Message)]
 #[rtype(result = "()")]
 struct Hungry{}
@@ -205,7 +192,7 @@ impl Handler<ChopstickAvailable> for Philosopher{
     }
 }
 
-/*FinishedEating: time to release the chopsticks */
+/*FINSHED EATING: time to release the chopsticks (recursive) */
 #[derive(Message)]
 #[rtype(result = "()")]
 struct FinishedEating{}
@@ -227,6 +214,7 @@ impl Handler<FinishedEating> for Philosopher{
     }
 }
 
+/*THINK: After eating ill begin to think (recursive) */
 #[derive(Message)]
 #[rtype(result = "()")]
 struct Think{}
@@ -244,6 +232,7 @@ impl Handler<Think> for Philosopher{
 
 }
 
+/*EAT: Now that i have my chopsticks ill eat (recursive) */
 #[derive(Message)]
 #[rtype(result = "()")]
 struct Eat{}
@@ -258,8 +247,6 @@ impl Handler<Eat> for Philosopher{
         _ctx.address().try_send(FinishedEating{}).unwrap();
     }
 }
-
-
 
 fn main(){
     let system: actix::SystemRunner = System::new();
@@ -283,6 +270,7 @@ fn main(){
                 Philosopher{chopsticks:chopsticks_access, chopsticks_in_hand: HashSet::new(), my_id: i_philosopher}.start()
             }).collect::<Vec<_>>();
         println!("Philosophers created");
+        
         //ahora debo crear la tarea inicial que serí decirle aleatoriamente a cada filósofo Hungry o Think
         for i_philosopher in 0..5{
             let philosopher_addr = philosophers[i_philosopher].clone();
