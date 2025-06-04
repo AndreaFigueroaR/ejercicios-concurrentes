@@ -37,6 +37,18 @@ name = "hola-andrea"
 path = "src/practica-actix/hola-andrea/main.rs"
 
 [[bin]]
+name = "fumadores-dummy-monitor"
+path = "src/estado-compartido/fumadores-dummy-monitor/main.rs"
+
+[[bin]]
+name = "heladeria-actores"
+path = "src/practica-actix/heladeria-robots-clientes/main.rs"
+
+[[bin]]
+name = "acceptor-actors"
+path = "src/practica-actix/acceptor-server/main.rs"
+
+[[bin]]
 name = "filosofos-actores"
 path = "src/actores-canales/filosofos-actores/main.rs"
 
@@ -50,6 +62,8 @@ actix_async_handler = "0.1.0"
 futures = "0.3"
 tokio = { version = "1.0", features = ["full"] }
 anyhow = "1.0" # necesario para usar el main de tokio
+tokio-util = "0.7" #para acceptor con actores
+bytes = "1"# para la parte de trabajp con strem de bytes por los sockets... flata entender bien y revisar si es permitido por la catedra
 
 [dev-dependencies]
 actix_async_handler = "0.1.0"
