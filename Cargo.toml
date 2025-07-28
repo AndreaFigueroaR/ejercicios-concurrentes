@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
+name = "scrum-master-election"
+path = "src/concurrencia-distribuida/algoritmos-eleccion/main.rs"
+
+[[bin]]
 name = "banquero-bussy-waiting"
 path = "src/estado-compartido/banquero_bussy_waiting/main.rs"
 
