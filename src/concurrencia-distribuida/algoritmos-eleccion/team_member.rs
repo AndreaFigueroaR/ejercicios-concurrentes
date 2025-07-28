@@ -2,6 +2,7 @@ use rand::{thread_rng, Rng};
 
 use crate::bully_leader_election::BullyLeaderElection;
 use crate::leader_election::LeaderElection;
+use crate::ring_leader_election::RingLeaderElection;
 use std::net::{SocketAddr, UdpSocket};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, RwLock};
@@ -43,7 +44,8 @@ impl TeamMember {
             //OJO: antes de empezar a enviar mensajes de datos (ping o pong) primero instancio el LeaderElection
             //mediante el cual se sabrá quien es el lider
             let mut scrum_master: Box<dyn LeaderElection> =
-                Box::new(BullyLeaderElection::new(self.id));
+                Box::new(RingLeaderElection::new(self.id));
+            // Box::new(BullyLeaderElection::new(self.id));
 
             // flag para simular si se cayó el rpoceso o no (protegida porque el hilo receiver al estar "caido"
             // debe ignorar los mensajes de ping)
@@ -65,7 +67,8 @@ impl TeamMember {
                     // si el proceso no es lider hay acciones activas que hacer:
 
                     // pedirle al SM la tarea a realizar (envío activo, nosotros sabemos aquí cuando queremos pedirlo)
-                    // y bueno lo hacemos directamente por aquí
+                    // ehacemos el llamado bloqueante al método que nos debe decir el resultado de una elección.
+                    // podría retornarnos a un proceso ya muerto, pero terminará.
                     let leader_id = scrum_master.get_leader_id();
                     self.socket
                         .send_to("PING".as_bytes(), id_to_dataaddr(leader_id))
@@ -92,7 +95,7 @@ impl TeamMember {
         }
     }
 
-    //hilo que se encarga de recivir y responder (en caso de ser necesario) los mensajes recibidos
+    //hilo que se encarga de recivir (y responder en caso de ser necesario) los mensajes recibidos.
     fn receiver(self: &Arc<Self>, got_pong: Sender<SocketAddr>) {
         const PING: [u8; 4] = [b'P', b'I', b'N', b'G'];
         const PONG: [u8; 4] = [b'P', b'O', b'N', b'G'];
