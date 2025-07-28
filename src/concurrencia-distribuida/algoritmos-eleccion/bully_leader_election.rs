@@ -4,8 +4,6 @@ use std::net::UdpSocket;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
-//TAREA 2: Darme cuenta si esta implem,entación llega a darse cuenta sola que se cayó el lider
-
 fn id_to_ctrladdr(id: usize) -> String {
     "127.0.0.1:1234".to_owned() + &*id.to_string()
 }
@@ -95,12 +93,6 @@ impl BullyLeaderElection {
         }
     }
 
-    fn id_to_msg(&self, header: u8) -> Vec<u8> {
-        let mut msg = vec![header];
-        msg.extend_from_slice(&self.id.to_le_bytes());
-        msg
-    }
-
     fn send_election(&self) {
         // P envía el mensaje ELECTION a todos los procesos que tengan número mayor
         let msg = self.id_to_msg(b'E');
@@ -185,5 +177,11 @@ impl BullyLeaderElection {
             got_ok: self.got_ok.clone(),
             stop: self.stop.clone(),
         }
+    }
+
+    fn id_to_msg(&self, header: u8) -> Vec<u8> {
+        let mut msg = vec![header];
+        msg.extend_from_slice(&self.id.to_le_bytes());
+        msg
     }
 }
